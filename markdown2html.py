@@ -1,17 +1,17 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import sys
 import os
 import hashlib
 import re
 
-# Function to parse headings in markdown and convert to HTML <h1> to <h6>
+# Función para manejar los encabezados de markdown a HTML
 def parse_headings(line):
     heading_level = line.count('#')
-    if heading_level in range(1, 7):
+    if heading_level in range(1, 7):  # solo para encabezados válidos (# a ######)
         return f"<h{heading_level}>{line.strip('#').strip()}</h{heading_level}>"
     return line
 
-# Function to parse unordered lists (-) and convert to <ul> and <li>
+# Función para manejar listas no ordenadas (con "-")
 def parse_unordered_list(lines):
     result = "<ul>\n"
     for line in lines:
@@ -20,7 +20,7 @@ def parse_unordered_list(lines):
     result += "</ul>\n"
     return result
 
-# Function to parse ordered lists (*) and convert to <ol> and <li>
+# Función para manejar listas ordenadas (con "*")
 def parse_ordered_list(lines):
     result = "<ol>\n"
     for line in lines:
@@ -29,27 +29,29 @@ def parse_ordered_list(lines):
     result += "</ol>\n"
     return result
 
-# Function to parse paragraph text and wrap in <p> tags
+# Función para manejar párrafos
 def parse_paragraph(lines):
     result = ""
     for line in lines:
-        if line.strip():
+        if line.strip():  # Solo agregar si no está vacío
             result += f"<p>{line.strip()}</p>\n"
     return result
 
-# Function to parse bold and emphasis text in markdown
+# Función para manejar negrita y énfasis en el texto
 def parse_bold_italic(line):
-    line = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', line)  # Bold
-    line = re.sub(r'__(.*?)__', r'<em>\1</em>', line)  # Emphasis
+    line = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', line)  # Convertir **bold**
+    line = re.sub(r'__(.*?)__', r'<em>\1</em>', line)  # Convertir __emphasis__
     return line
 
-# Function to parse special cases: [[text]] -> MD5 and ((text)) -> remove 'c'/'C'
+# Función para manejar los casos especiales
 def parse_special_cases(line):
-    line = re.sub(r'\[\[(.*?)\]\]', lambda m: hashlib.md5(m.group(1).encode()).hexdigest(), line)  # MD5
-    line = re.sub(r'\(\((.*?)\)\)', lambda m: m.group(1).replace('c', '').replace('C', ''), line)  # Remove 'c' and 'C'
+    # Convertir [[texto]] a MD5
+    line = re.sub(r'\[\[(.*?)\]\]', lambda m: hashlib.md5(m.group(1).encode()).hexdigest(), line)
+    # Eliminar todas las "c" y "C" de ((texto))
+    line = re.sub(r'\(\((.*?)\)\)', lambda m: m.group(1).replace('c', '').replace('C', ''), line)
     return line
 
-# Function to convert markdown content to HTML and write to file
+# Función principal para convertir el markdown a HTML
 def markdown_to_html(filename, output_file):
     with open(filename, 'r') as file:
         lines = file.readlines()
@@ -59,7 +61,8 @@ def markdown_to_html(filename, output_file):
         line = parse_headings(line)
         line = parse_bold_italic(line)
         line = parse_special_cases(line)
-        # Handle lists separately
+        
+        # Procesar listas
         if line.startswith('-'):
             html_content += parse_unordered_list([line])
         elif line.startswith('*'):
@@ -70,7 +73,7 @@ def markdown_to_html(filename, output_file):
     with open(output_file, 'w') as file:
         file.write(html_content)
 
-# Main function to handle arguments and control the script flow
+# Función para manejar los argumentos y errores
 def main():
     if len(sys.argv) < 3:
         print("Usage: ./markdown2html.py README.md README.html", file=sys.stderr)
@@ -88,4 +91,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
