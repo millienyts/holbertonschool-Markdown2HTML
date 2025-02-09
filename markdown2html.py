@@ -7,7 +7,7 @@ import re
 # Función para manejar los encabezados de markdown a HTML
 def parse_headings(line):
     heading_level = line.count('#')
-    if heading_level in range(1, 7):  # solo para encabezados válidos (# a ######)
+    if heading_level in range(1, 7):  # Solo para encabezados válidos (# a ######)
         return f"<h{heading_level}>{line.strip('#').strip()}</h{heading_level}>"
     return line
 
@@ -58,9 +58,9 @@ def markdown_to_html(filename, output_file):
 
     html_content = ""
     for line in lines:
-        line = parse_headings(line)
-        line = parse_bold_italic(line)
         line = parse_special_cases(line)
+        line = parse_bold_italic(line)
+        line = parse_headings(line)
         
         # Procesar listas
         if line.startswith('-'):
